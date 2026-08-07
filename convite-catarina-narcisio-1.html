@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Catarina &amp; Narcísio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Parisienne&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wine:#6d1f2c;
+    --wine-deep:#4a1420;
+    --blush:#f6ece6;
+    --rose:#e7c6c3;
+    --gold:#b08a4e;
+    --ink:#2c1a16;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:var(--wine-deep);
+    font-family:'EB Garamond', serif;
+    color:var(--ink);
+    overflow-x:hidden;
+  }
+  .stage{
+    position:relative;
+    min-height:100vh;
+    min-height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(ellipse at top, #5c1826 0%, #3a1019 70%);
+  }
+
+  /* ---------- ENVELOPE ---------- */
+  .envelope-wrap{
+    position:relative;
+    width:min(88vw, 380px);
+    aspect-ratio: 3 / 2.1;
+    cursor:pointer;
+    perspective:1200px;
+    z-index:5;
+    transition:opacity .6s ease;
+  }
+  .envelope-wrap.hidden{ opacity:0; pointer-events:none; }
+
+  .env-body{
+    position:absolute; inset:0;
+    background:
+      linear-gradient(180deg, #fbf4ee 0%, #f3e6dc 100%);
+    border-radius:6px;
+    box-shadow: 0 25px 60px rgba(0,0,0,.45), 0 4px 10px rgba(0,0,0,.2);
+    overflow:hidden;
+  }
+  .env-body::before{
+    content:"";
+    position:absolute; inset:10px;
+    border:1px solid rgba(176,138,78,.5);
+    pointer-events:none;
+  }
+  .env-flourish{
+    position:absolute; inset:0;
+    opacity:.5;
+    background-repeat:no-repeat;
+    background-size:120px;
+  }
+  .env-flourish.tl{ top:-10px; left:-10px; background-image:radial-gradient(circle, transparent 60%, transparent 60%); }
+
+  .env-flap{
+    position:absolute;
+    top:0; left:0; width:100%; height:52%;
+    background:linear-gradient(160deg,#f6ece3 0%, #ecdac9 100%);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    transform: rotateX(0deg);
+    transition: transform 1s cubic-bezier(.65,0,.35,1);
+    z-index:3;
+    box-shadow: 0 2px 6px rgba(0,0,0,.15) inset;
+  }
+  .env-flap::after{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(115deg, transparent 0 18px, rgba(176,138,78,.18) 18px 19px),
+      repeating-linear-gradient(65deg, transparent 0 18px, rgba(176,138,78,.18) 18px 19px);
+    opacity:.6;
+  }
+  .envelope-wrap.open .env-flap{ transform: rotateX(178deg); z-index:1; }
+
+  .env-inner-shadow{
+    position:absolute; top:0; left:0; width:100%; height:52%;
+    background:linear-gradient(180deg, rgba(0,0,0,.15), transparent);
+    z-index:2;
+    opacity:0;
+    transition:opacity .6s ease .3s;
+  }
+  .envelope-wrap.open .env-inner-shadow{ opacity:1; }
+
+  .seal{
+    position:absolute;
+    top:50%; left:50%;
+    width:64px; height:64px;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, #8a2436, var(--wine) 55%, var(--wine-deep) 100%);
+    box-shadow: 0 4px 10px rgba(0,0,0,.35), inset 0 0 8px rgba(0,0,0,.4);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Parisienne', cursive;
+    color:#e9c98f;
+    font-size:22px;
+    z-index:4;
+    transition: transform .5s ease, opacity .5s ease;
+  }
+  .envelope-wrap.open .seal{
+    transform:translate(-50%,-50%) scale(1.15) rotate(8deg);
+    opacity:0;
+  }
+  .env-tap{
+    position:absolute; bottom:14px; left:0; right:0;
+    text-align:center;
+    font-family:'EB Garamond', serif;
+    font-size:11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--gold);
+    z-index:4;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:.55;} 50%{opacity:1;} }
+
+  /* ---------- CARD CONTENT ---------- */
+  .card{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:6vh 0 8vh;
+    overflow-y:auto;
+    opacity:0;
+    transform:translateY(24px);
+    transition: opacity 1s ease .4s, transform 1s ease .4s;
+    pointer-events:none;
+  }
+  .card.show{ opacity:1; transform:translateY(0); pointer-events:auto; }
+
+  .sheet{
+    width:min(90vw, 420px);
+    background:var(--blush);
+    border-radius:4px;
+    box-shadow:0 30px 70px rgba(0,0,0,.4);
+    padding:44px 30px 40px;
+    text-align:center;
+    position:relative;
+  }
+  .sheet::before{
+    content:"";
+    position:absolute; inset:12px;
+    border:1px solid rgba(176,138,78,.55);
+    pointer-events:none;
+  }
+
+  .bismillah-ar{
+    font-size:20px;
+    color:var(--wine);
+    margin:0 0 4px;
+  }
+  .bismillah-pt{
+    font-size:12px;
+    letter-spacing:.12em;
+    color:var(--gold);
+    text-transform:uppercase;
+    margin:0 0 26px;
+  }
+
+  .guest-greeting{
+    font-size:16px;
+    font-style:italic;
+    color:var(--wine);
+    margin:0 0 22px;
+    display:none;
+  }
+  .guest-greeting.show{ display:block; }
+
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.35em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin:0 0 10px;
+  }
+  .names{
+    font-family:'Parisienne', cursive;
+    font-size:44px;
+    line-height:1.15;
+    color:var(--wine);
+    margin:0 0 4px;
+  }
+  .amp{
+    display:block;
+    font-size:22px;
+    color:var(--gold);
+    margin:2px 0;
+  }
+  .subline{
+    font-size:13px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--ink);
+    opacity:.75;
+    margin:6px 0 26px;
+  }
+  .divider{
+    width:60px; height:1px;
+    background:var(--gold);
+    margin:0 auto 26px;
+    opacity:.7;
+  }
+  .welcome{
+    font-size:16px;
+    line-height:1.75;
+    color:var(--ink);
+    margin:0 0 30px;
+    font-style:italic;
+  }
+
+  .details{
+    display:flex; flex-direction:column; gap:14px;
+    margin-bottom:30px;
+  }
+  .detail-row{
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .detail-label{
+    font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--gold);
+  }
+  .detail-value{
+    font-size:17px; color:var(--wine); font-weight:500;
+  }
+
+  .countdown-label{
+    font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold);
+    margin-bottom:12px;
+  }
+  .countdown{
+    display:flex; justify-content:center; gap:16px;
+    margin-bottom:32px;
+  }
+  .cd-unit{ min-width:52px; }
+  .cd-num{
+    font-family:'Cormorant Garamond', serif;
+    font-size:30px; color:var(--wine); font-weight:600;
+    font-variant-numeric: tabular-nums;
+  }
+  .cd-lab{
+    font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink); opacity:.6;
+  }
+
+  .schedule{
+    text-align:left;
+    border-top:1px solid rgba(176,138,78,.4);
+    border-bottom:1px solid rgba(176,138,78,.4);
+    padding:22px 4px;
+    margin-bottom:26px;
+  }
+  .schedule-title{
+    font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold);
+    text-align:center; margin-bottom:14px;
+  }
+  .schedule-item{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:14px; color:var(--ink); padding:4px 0;
+  }
+  .schedule-item span:first-child{ font-weight:600; color:var(--wine); }
+
+  .closing{
+    font-family:'Parisienne', cursive;
+    font-size:20px;
+    color:var(--wine);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .env-flap, .seal, .card, .envelope-wrap{ transition:none !important; animation:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <div class="envelope-wrap" id="envelope">
+    <div class="env-body">
+      <div class="env-flap"></div>
+      <div class="env-inner-shadow"></div>
+      <div class="seal">C&amp;N</div>
+      <div class="env-tap">Toque para abrir</div>
+    </div>
+  </div>
+
+  <div class="card" id="card">
+    <div class="sheet">
+      <p class="bismillah-ar">بسم الله الرحمن الرحيم</p>
+      <p class="bismillah-pt">Em nome de Deus, o Clemente, o Misericordioso</p>
+
+      <p class="guest-greeting" id="guest-greeting"></p>
+
+      <p class="eyebrow">Convidam-vos para o seu Nikah</p>
+      <p class="names">Catarina<span class="amp">&amp;</span>Narcísio</p>
+      <p class="subline">Duas vidas, um só caminho</p>
+
+      <div class="divider"></div>
+
+      <p class="welcome">Junte-se a nós numa tarde de amor, orações
+      e memórias inesquecíveis, enquanto damos início à nossa nova vida juntos.</p>
+
+      <div class="details">
+        <div class="detail-row">
+          <span class="detail-label">Data</span>
+          <span class="detail-value">12 de Dezembro de 2026</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Hora</span>
+          <span class="detail-value">12h00</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Local</span>
+          <span class="detail-value">Auditório da ESU — Úlongué</span>
+        </div>
+      </div>
+
+      <p class="countdown-label">Faltam</p>
+      <div class="countdown">
+        <div class="cd-unit"><div class="cd-num" id="cd-days">--</div><div class="cd-lab">Dias</div></div>
+        <div class="cd-unit"><div class="cd-num" id="cd-hours">--</div><div class="cd-lab">Horas</div></div>
+        <div class="cd-unit"><div class="cd-num" id="cd-min">--</div><div class="cd-lab">Min</div></div>
+        <div class="cd-unit"><div class="cd-num" id="cd-sec">--</div><div class="cd-lab">Seg</div></div>
+      </div>
+
+      <div class="schedule">
+        <div class="schedule-title">Programa</div>
+        <div class="schedule-item"><span>12h00</span><span>Cerimónia do Nikah</span></div>
+        <div class="schedule-item"><span>13h30</span><span>Fotografias e felicitações</span></div>
+        <div class="schedule-item"><span>14h30</span><span>Almoço de celebração</span></div>
+      </div>
+
+      <p class="closing">Contamos com a vossa presença ✿</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const envelope = document.getElementById('envelope');
+  const card = document.getElementById('card');
+
+  // Saudação personalizada via link: convite.html?nome=Maria
+  const params = new URLSearchParams(window.location.search);
+  const guestName = params.get('nome');
+  if (guestName && guestName.trim()) {
+    const greeting = document.getElementById('guest-greeting');
+    greeting.textContent = 'Querido(a) ' + decodeURIComponent(guestName.trim()) + ',';
+    greeting.classList.add('show');
+  }
+
+  envelope.addEventListener('click', function open(){
+    envelope.classList.add('open');
+    setTimeout(function(){
+      envelope.classList.add('hidden');
+      card.classList.add('show');
+    }, 550);
+    envelope.removeEventListener('click', open);
+  });
+
+  // Countdown to 12 Dec 2026, 12:00
+  const target = new Date('2026-12-12T12:00:00');
+  function tick(){
+    const now = new Date();
+    let diff = target - now;
+    if (diff < 0) diff = 0;
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('cd-days').textContent = d;
+    document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
+    document.getElementById('cd-min').textContent = String(m).padStart(2,'0');
+    document.getElementById('cd-sec').textContent = String(s).padStart(2,'0');
+  }
+  tick();
+  setInterval(tick, 1000);
+</script>
+
+</body>
+</html>
